@@ -3,7 +3,7 @@
 
 Command line tool that converts text FNT files and font bitmaps to C/C++ code.
 
-To generate a FNT and a glyph bitmap from a TTF front file, I suggest using
+To generate a FNT and a glyph bitmap from a TTF typeface file, I suggest using
 [Hiero](https://github.com/libgdx/libgdx/wiki/Hiero) or [BMFont](http://www.angelcode.com/products/bmfont/).
 
 ----
