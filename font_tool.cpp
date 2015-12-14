@@ -131,7 +131,7 @@ int rleDecode(RLE_Byte * output, const int outSizeBytes, const RLE_Byte * input,
     RLE_Word rleCount;
     RLE_Byte rleByte;
 
-    for (int i = 0; i < inSizeBytes; ++i)
+    for (int i = 0; i < inSizeBytes; i += 2)
     {
         rleRead(input, rleCount);
         rleRead(input, rleByte);
