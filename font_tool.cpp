@@ -131,7 +131,7 @@ int rleDecode(RLE_Byte * output, const int outSizeBytes, const RLE_Byte * input,
     RLE_Word rleCount;
     RLE_Byte rleByte;
 
-    for (int i = 0; i < inSizeBytes; i += 2)
+    for (int i = 0; i < inSizeBytes; i += sizeof(rleCount) + sizeof(rleByte))
     {
         rleRead(input, rleCount);
         rleRead(input, rleByte);
@@ -165,7 +165,7 @@ static void loadFontBitmap(int & width, int & height, int & channels, std::vecto
                            const std::string & filename, const bool grayscale)
 {
     int x = 0, y = 0, c = 0;
-    RLE_Byte * data = stbi_load(filename.c_str(), &x, &y, &c, /* require RGBA */ 4);
+    RLE_Byte * data = stbi_load(filename.c_str(), &x, &y, &c, (grayscale ? 1 : 4));
 
     if (!data)
     {
@@ -179,31 +179,12 @@ static void loadFontBitmap(int & width, int & height, int & channels, std::vecto
         error("Unable to load image from \"" + filename + "\": bad dimensions");
     }
 
-    if (grayscale)
-    {
-        const int count = x * y;
-        const RLE_Byte * ptr = data;
-
-        c = 1; // 1 byte per-pixel
-        bitmap.resize(count);
-
-        for (int i = 0; i < count; ++i)
-        {
-            bitmap[i] = ptr[3]; // Store the alpha intensity only.
-            ptr += 4;
-        }
-    }
-    else
-    {
-        c = 4; // RGBA
-        bitmap.resize(x * y * c);
-        std::memcpy(bitmap.data(), data, x * y * c);
-    }
-
     width    = x;
     height   = y;
-    channels = c;
+    channels = (grayscale ? 1 : 4);
 
+    bitmap.resize(width * height * channels);
+    std::memcpy(bitmap.data(), data, bitmap.size());
     stbi_image_free(data);
 }
 
