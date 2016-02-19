@@ -1,4 +1,4 @@
 [submodule "compression-algorithms"]
-    path = compression
-    url=https://github.com/glampert/compression-algorithms.git
+    path = extern/compression
+    url  = https://github.com/glampert/compression-algorithms.git
 
