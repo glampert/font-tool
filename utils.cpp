@@ -337,11 +337,11 @@ ProgramOptions parseCmdLine(const int argc, const char * argv[])
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
 #define STBI_ONLY_JPEG
-#include "stb_image.h"
+#include "extern/stb/stb_image.h"
 
 #ifdef DEBUG_DUMP_FNT_BITMAP
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "extern/stb/stb_image_write.h"
 #endif // DEBUG_DUMP_FNT_BITMAP
 
 constexpr float byteToFloat(const std::uint8_t b) { return static_cast<float>(b) * (1.0f / 255.0f); }
