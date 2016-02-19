@@ -13,15 +13,15 @@
 #include "data_writer.hpp"
 
 static std::string toEscapedHexaString(const std::uint8_t * data, const int dataSizeBytes,
-                                       const int maxCols = 80, const int padding = 0)
+                                       const int maxColumns = 88, const int padding = 0)
 {
     if (data == nullptr)
     {
-        error("Null data pointer!");
+        error("toEscapedHexaString: Null data pointer!");
     }
-    if ((maxCols % 4) != 0 || (padding % 2) != 0)
+    if ((maxColumns % 4) != 0 || (padding % 2) != 0)
     {
-        error("Invalid maxCols or padding!");
+        error("toEscapedHexaString: Invalid maxColumns or padding!");
     }
 
     int column = 0;
@@ -34,7 +34,7 @@ static std::string toEscapedHexaString(const std::uint8_t * data, const int data
         result += hexaStr;
         column += 4;
 
-        if (column == maxCols)
+        if (column == maxColumns)
         {
             if (i != (dataSizeBytes - 1)) // If not the last iteration
             {
@@ -53,7 +53,7 @@ static std::string toEscapedHexaString(const std::uint8_t * data, const int data
             result += "\\x00";
             column += 4;
 
-            if (column == maxCols)
+            if (column == maxColumns)
             {
                 if ((i + 1) % padding) // If not the last iteration
                 {
@@ -132,7 +132,7 @@ void DataWriter::writeStructures()
     {
         xyTypeStr = "std::uint16_t";
         bitmapTypeStr = "std::uint8_t";
-        std::fprintf(outFile, "\n#include <cstdint>\n");
+        std::fprintf(outFile, "\n#include <cstdint>\n"); // You get the include for free, like it or not :P
     }
     else
     {
@@ -182,7 +182,7 @@ void DataWriter::writeBitmapArray(const ByteBuffer & bitmapData)
         const auto hexaStr = toEscapedHexaString(bitmapData.data(), bitmapData.size());
         std::fprintf(outFile, " // ~%s\n%s;\n", memSizeStr.c_str(), hexaStr.c_str());
     }
-    else // "Traditional" array of hexadecimal bytes:
+    else // "Traditional" array of comma-separated hexadecimal bytes:
     {
         std::fprintf(outFile, " { // ~%s\n  ", memSizeStr.c_str());
 

@@ -28,7 +28,11 @@ static void compressFontBitmapData(ByteBuffer & bitmapData, const int width,
     auto compressedBitmapData = compressor->compress(bitmapData);
 
     // Run again without '-c/--compress'
-    if (compressedBitmapData.size() > bitmapData.size())
+    if (compressedBitmapData.empty())
+    {
+        error("Failed to compress the glyph bitmap!");
+    }
+    else if (compressedBitmapData.size() > bitmapData.size())
     {
         error("Compression would produce a bigger bitmap! Cowardly refusing to compress it...");
     }

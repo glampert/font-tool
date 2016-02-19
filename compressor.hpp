@@ -28,7 +28,6 @@ public:
 
     // Compressor interface:
     virtual ByteBuffer compress(const ByteBuffer & uncompressed) = 0;
-    virtual ByteBuffer decompress(const ByteBuffer & compressed) = 0;
     virtual ~Compressor() = default;
 };
 

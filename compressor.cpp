@@ -12,6 +12,15 @@
 
 #include "compressor.hpp"
 
+#define RLE_IMPLEMENTATION
+#include "extern/compression/rle.hpp"
+
+#define LZW_IMPLEMENTATION
+#include "extern/compression/lzw.hpp"
+
+#define HUFFMAN_IMPLEMENTATION
+#include "extern/compression/huffman.hpp"
+
 // ========================================================
 // NoOpCompressor:
 // ========================================================
@@ -22,7 +31,6 @@ class NoOpCompressor final
 public:
     // Return the input unchanged.
     ByteBuffer compress(const ByteBuffer & uncompressed) override { return uncompressed; }
-    ByteBuffer decompress(const ByteBuffer & compressed) override { return compressed;   }
 };
 
 // ========================================================
@@ -33,16 +41,25 @@ class RLECompressor final
     : public Compressor
 {
 public:
-
     ByteBuffer compress(const ByteBuffer & uncompressed) override
     {
-        //TODO
-        return uncompressed;
-    }
+        // RLE might make things bigger, so make the compress buffer the double.
+        ByteBuffer compressed(uncompressed.size() * 2);
 
-    ByteBuffer decompress(const ByteBuffer & compressed) override
-    {
-        //TODO
+        // Compress it:
+        const int compressedSize = rle::easyEncode(uncompressed.data(), uncompressed.size(),
+                                                   compressed.data(),   compressed.size());
+
+        // Error / no compression?
+        if (compressedSize <= 0)
+        {
+            compressed.clear();
+        }
+        // If we compressed or got the same size, ignore the extra overhead in the output buffer:
+        else if (static_cast<std::size_t>(compressedSize) <= uncompressed.size())
+        {
+            compressed.resize(compressedSize);
+        }
         return compressed;
     }
 };
@@ -55,17 +72,31 @@ class LZWCompressor final
     : public Compressor
 {
 public:
-
     ByteBuffer compress(const ByteBuffer & uncompressed) override
     {
-        //TODO
-        return uncompressed;
-    }
+        int compressedSizeBits  = 0;
+        int compressedSizeBytes = 0;
+        lzw::UByte * compressedDataPtr = nullptr;
 
-    ByteBuffer decompress(const ByteBuffer & compressed) override
-    {
-        //TODO
-        return compressed;
+        // Compress:
+        lzw::easyEncode(uncompressed.data(), uncompressed.size(),
+                        &compressedDataPtr, &compressedSizeBytes,
+                        &compressedSizeBits);
+
+        ByteBuffer compressedBuffer((sizeof(std::uint32_t) * 2) + compressedSizeBytes);
+
+        // Append the compressed size in bytes and bits to
+        // the output buffer. We will need those for decompression.
+        auto bitsPtr = reinterpret_cast<std::uint32_t *>(compressedBuffer.data());
+        *bitsPtr++ = compressedSizeBytes;
+        *bitsPtr++ = compressedSizeBits;
+
+        // Append the rest of the compressed bit stream:
+        std::memcpy(bitsPtr, compressedDataPtr, compressedSizeBytes);
+
+        // Done! We can now free the LZW buffer.
+        LZW_MFREE(compressedDataPtr);
+        return compressedBuffer;
     }
 };
 
@@ -77,17 +108,31 @@ class HuffmanCompressor final
     : public Compressor
 {
 public:
-
     ByteBuffer compress(const ByteBuffer & uncompressed) override
     {
-        //TODO
-        return uncompressed;
-    }
+        int compressedSizeBits  = 0;
+        int compressedSizeBytes = 0;
+        huffman::UByte * compressedDataPtr = nullptr;
 
-    ByteBuffer decompress(const ByteBuffer & compressed) override
-    {
-        //TODO
-        return compressed;
+        // Compress:
+        huffman::easyEncode(uncompressed.data(), uncompressed.size(),
+                            &compressedDataPtr, &compressedSizeBytes,
+                            &compressedSizeBits);
+
+        ByteBuffer compressedBuffer((sizeof(std::uint32_t) * 2) + compressedSizeBytes);
+
+        // Append the compressed size in bytes and bits to
+        // the output buffer. We will need those for decompression.
+        auto bitsPtr = reinterpret_cast<std::uint32_t *>(compressedBuffer.data());
+        *bitsPtr++ = compressedSizeBytes;
+        *bitsPtr++ = compressedSizeBits;
+
+        // Append the rest of the compressed bit stream:
+        std::memcpy(bitsPtr, compressedDataPtr, compressedSizeBytes);
+
+        // Done! We can now free the Huffman buffer.
+        HUFFMAN_MFREE(compressedDataPtr);
+        return compressedBuffer;
     }
 };
 
