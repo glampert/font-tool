@@ -3,7 +3,7 @@
 
 Command line tool that converts text FNT files and font bitmaps to C/C++ code.
 
-To generate a FNT and a glyph bitmap from a TTF typeface file, I suggest using
+To generate a FNT file and a glyph bitmap from a TTF typeface, I suggest using
 [Hiero](https://github.com/libgdx/libgdx/wiki/Hiero) or [BMFont](http://www.angelcode.com/products/bmfont/).
 
 ----
@@ -20,10 +20,14 @@ Usage:
  Options are:
   -h, --help         Prints this message and exits.
   -v, --verbose      Prints some verbose stats about the program execution.
-  -c, --compress     Compresses the output glyph bitmap array with simple RLE encoding.
-  -s, --static       Qualify the C arrays with the 'static' storage class.
+  -c, --compress     Compresses the output glyph bitmap array with RLE encoding by default.
+  -s, --static       Qualify the C/C++ arrays with the 'static' storage class.
+  -m, --mutable      Allow the output data to be mutable, i.e. omit the 'const' qualifier.
   -S, --structs      Also outputs the 'FontChar/FontCharSet' structures at the beginning of the file.
+  -T, --stdtypes     Use Standard C++ types like std::uint8_t and std::uint16_t in the output structs/arrays.
+  -H, --hex          Write the glyph bitmap data as an escaped hexadecimal string. The default is an array of hexa unsigned bytes.
   -x, --rgba         Write the glyph bitmap in RGBA format. Default is 1-byte-per-pixel grayscale.
-  --align=N          Applies GCC/Clang '__attribute__((aligned(N)))' extension to the output arrays.
+  --align=N          Applies GCC/Clang __attribute__((aligned(N))) extension to the output arrays.
+  --encoding=method  If combined with -c/--compress, specifies the encoding to use. Methods are: rle,lzw,huff. Defaults to rle.
 </pre>
 
